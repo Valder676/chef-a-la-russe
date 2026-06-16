@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  fio         String
+  phone       String?
+  city        String?
+  organization String?
+  birthDate   DateTime?
+  role        String   @default("participant") // participant, judge, admin
+  status      String   @default("pending") // pending, confirmed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  teamMembers TeamMember[]
+  documents   Document[]
+  uploads     Upload[]
+}
+
+model Team {
+  id                String   @id @default(cuid())
+  name              String
+  category          String   // Hot Kitchen, etc.
+  championshipType  String   @default("adult") // adult, junior
+  status            String   @default("pending") // pending, confirmed
+  stage             String   @default("qualifier") // qualifier, final (этап чемпионата)
+  resultsPublished  Boolean  @default(false) // скрывать результаты от участников до публикации
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  members    TeamMember[]
+  results    Result[]
+  uploads    Upload[]
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    String
+  status    String   @default("pending") // pending, confirmed
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId])
+  @@unique([userId, teamId])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  fileName  String
+  fileSize  Int
+  status    String   @default("pending") // pending, confirmed, rejected
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Upload {
+  id          String   @id @default(cuid())
+  teamId      String
+  userId      String
+  dishNumber  Int      // 1, 2, 3
+  fileType    String   // photo, techCard, menu
+  fileName    String
+  fileSize    Int
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([teamId, dishNumber])
+}
+
+model Result {
+  id        String   @id @default(cuid())
+  teamId    String
+  judgeId   String
+  dishNumber Int
+  stage     String   @default("qualifier") // qualifier, final
+  /// Регламент Chef a la Russe: сумма критериев по блюду до 100 баллов
+  miseEnPlace       Float // Организация рабочего места — до 5
+  hygieneWaste      Float // Гигиена и пищевые отходы — до 10
+  professionalPrep  Float // Профессиональное приготовление — до 15
+  innovation        Float // Инновационность — до 5
+  service           Float // Сервис — до 5
+  presentation      Float // Презентация — до 10
+  tasteTexture      Float // Вкус и текстура — до 50
+  penalties Float   @default(0)
+  total     Float
+  status    String   @default("draft") // draft, fixed
+  createdAt DateTime @default(now())
+  
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  violationPhotos ViolationPhoto[]
+  
+  @@unique([teamId, judgeId, dishNumber, stage])
+}
+
+model ViolationPhoto {
+  id          String   @id @default(cuid())
+  resultId    String
+  criterionKey String // miseEnPlace, hygieneWaste, professionalPrep, innovation, service, presentation, tasteTexture
+  fileName    String
+  fileSize    Int
+  createdAt   DateTime @default(now())
+  
+  result Result @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  
+  @@index([resultId, criterionKey])
+}

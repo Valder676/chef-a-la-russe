@@ -1,0 +1,49 @@
+{
+  "name": "chef-championship-2026",
+  "version": "0.1.0",
+  "private": true,
+  "prisma": {
+    "schema": "backend/prisma/schema.prisma"
+  },
+  "scripts": {
+    "dev": "cd frontend && next dev",
+    "build": "cd frontend && next build",
+    "start": "cd frontend && next start",
+    "lint": "cd frontend && next lint",
+    "create-judge": "tsx scripts/create-judge.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:push:reset": "prisma db push --force-reset",
+    "db:reset": "prisma migrate reset",
+    "db:check": "tsx scripts/check-db.ts",
+    "db:users": "tsx scripts/list-users.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:migrate-roles": "tsx scripts/migrate-organizer-to-judge.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "prisma": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.3.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0"
+  }
+}
